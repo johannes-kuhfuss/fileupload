@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chunked File Upload</title>
+    <script>
+        // Function to upload a file in chunks
+        function uploadFileInChunks(file) {
+            const chunkSize = 1024 * 1024; // 1 MB chunk size
+            const totalChunks = Math.ceil(file.size / chunkSize);
+
+            let currentChunk = 0;
+
+            function uploadChunk() {
+                if (currentChunk >= totalChunks) {
+                    console.log('Upload complete');
+                    return;
+                }
+
+                const start = currentChunk * chunkSize;
+                const end = Math.min(start + chunkSize, file.size);
+
+                const chunk = file.slice(start, end);
+                const formData = new FormData();
+                formData.append('file', chunk);
+                formData.append('chunk', currentChunk);
+                formData.append('totalChunks', totalChunks);
+
+                fetch('http://localhost:8080/upload-chunk', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log(`Chunk ${currentChunk} uploaded`);
+                        currentChunk++;
+                        uploadChunk(); // Upload the next chunk
+                    } else {
+                        console.error(`Error uploading chunk ${currentChunk}`);
+                    }
+                });
+            }
+
+            uploadChunk(); // Start uploading the first chunk
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadForm = document.getElementById('upload-form');
+            uploadForm.addEventListener('submit', (event) => {
+                event.preventDefault(); // Prevent default form submission
+
+                const fileInput = document.getElementById('file');
+                const file = fileInput.files[0]; // Get the selected file
+                if (file) {
+                    uploadFileInChunks(file); // Start uploading the file in chunks
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Chunked File Upload</h1>
+    <form id="upload-form">
+        <label for="file">Choose a file:</label>
+        <input type="file" id="file" name="file" required>
+        <button type="submit">Upload</button> <!-- Submit button to initiate upload -->
+    </form>
+</body>
+</html>
