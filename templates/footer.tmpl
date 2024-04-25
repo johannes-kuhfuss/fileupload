@@ -1,0 +1,43 @@
+{{ define "footer" }}
+
+    <footer class="text-center text-lg-start bg-dark text-muted">
+        <div class="row py-md-2">
+            <div class="col px-md-3">
+            &copy; Johannes Kuhfuss, 2023
+            </div>
+
+            <div class="col">
+            </div>
+
+            <div class="col">
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+    {{block "js" .}}
+
+    {{end}}
+
+    <script>
+      function submitForm(button_id) {
+        const statusField = document.getElementById("status");
+        const hourField = document.getElementById("hour");
+        statusField.value = "Sending request..."
+        var http = new XMLHttpRequest();
+        http.open("POST", "/actions", true);
+        http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        var params = "action=" + button_id + "&hour=" + hourField.value
+        http.send(params);
+        setTimeout(function(){
+            location.reload();
+            statusField.value = "Request sent."
+        }, 500);
+        }
+    </script>
+
+    </body>
+
+    </html>
+{{ end }}

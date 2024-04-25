@@ -1,0 +1,55 @@
+{{ define "actions.page.tmpl" }}
+
+{{ template "header" .}}
+
+   <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1>mAirlist Feeder</h1>
+                <h2>Actions</h2>
+                <h3>Crawl</h3>
+                <p>
+                  <form action="" method="POST" onsubmit="return false">
+                    <input type="submit" id="crawl" value="Crawl" onclick="submitForm(this.id)" />
+                  </form>
+                </p>
+                <h3>Export</h3>
+                <p>
+                  <label for="hour">Hour (2 digits 00-23; leave empty to export all hours):</label>
+                  <input type="text" id="hour" name="hour" minlength="2" maxlength="2" size="10" />
+                  <form action="" method="POST" onsubmit="return false">
+                    <input type="submit" id="export" value="Export" onclick="submitForm(this.id)" />
+                  </form>
+                  <form action="" method="POST" onsubmit="return false">
+                    <input type="submit" id="csvexport" value="CSV Export" onclick="submitForm(this.id)" />
+                  </form>
+                </p>
+                <h3>Files</h3>
+                  <form action="" method="POST" onsubmit="return false">
+                      <input type="submit" id="importfromdisk" value="Import from disk" onclick="submitForm(this.id)" />
+                  </form>
+                  <form action="" method="POST" onsubmit="return false">
+                      <input type="submit" id="exporttodisk" value="Export to disk" onclick="submitForm(this.id)" />
+                  </form>
+                <h3>Clean-up</h3>
+                <p>
+                  <form action="" method="POST" onsubmit="return false">
+                    <input type="submit" id="clean" value="Clean-up" onclick="submitForm(this.id)" />
+                  </form>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="form-outline">
+                    <input class="form-control" id="status" type="text" aria-label="readonly input example" readonly /><br/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{{ template "footer" .}}
+
+{{ end }}
