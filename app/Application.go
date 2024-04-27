@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-sanitize/sanitize"
 	"github.com/johannes-kuhfuss/fileupload/config"
 	handler "github.com/johannes-kuhfuss/fileupload/handlers"
 	"github.com/johannes-kuhfuss/fileupload/service"
@@ -43,6 +44,7 @@ func StartApp() {
 	wireApp()
 	mapUrls()
 	RegisterForOsSignals()
+	createSanitizers()
 	go startServer()
 
 	<-appEnd
@@ -122,6 +124,15 @@ func mapUrls() {
 func RegisterForOsSignals() {
 	appEnd = make(chan os.Signal, 1)
 	signal.Notify(appEnd, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+}
+
+func createSanitizers() {
+	sani, err := sanitize.New()
+	if err != nil {
+		logger.Error("Error creating sanitizer", err)
+		panic(err)
+	}
+	cfg.RunTime.Sani = sani
 }
 
 func startServer() {

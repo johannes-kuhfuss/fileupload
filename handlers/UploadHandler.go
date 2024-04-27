@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/johannes-kuhfuss/fileupload/config"
+	"github.com/johannes-kuhfuss/fileupload/dto"
 	"github.com/johannes-kuhfuss/fileupload/service"
 	"github.com/johannes-kuhfuss/services_utils/api_error"
 	"github.com/johannes-kuhfuss/services_utils/logger"
@@ -29,6 +30,9 @@ func NewUploadHandler(cfg *config.AppConfig, svc service.DefaultUploadService) U
 }
 
 func (uh UploadHandler) Receive(c *gin.Context) {
+	var (
+		fd dto.FileDta
+	)
 	logger.Info("Upload request received")
 	err := c.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
@@ -38,7 +42,7 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
-	file, handler, err := c.Request.FormFile("file")
+	file, header, err := c.Request.FormFile("file")
 	if err != nil {
 		msg := "cannot read remote file"
 		logger.Error(msg, err)
@@ -48,23 +52,33 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 	}
 	defer file.Close()
 
-	if !misc.SliceContainsString(uh.Cfg.Upload.AllowedExtensions, filepath.Ext(handler.Filename)) {
-		msg := fmt.Sprintf("Cannot upload file with extension %v", filepath.Ext(handler.Filename))
-		logger.Warn(fmt.Sprintf("User tried to upload file with name %v. Extension not allowed.", handler.Filename))
+	if !misc.SliceContainsString(uh.Cfg.Upload.AllowedExtensions, filepath.Ext(header.Filename)) {
+		msg := fmt.Sprintf("Cannot upload file with extension %v", filepath.Ext(header.Filename))
+		logger.Warn(fmt.Sprintf("User tried to upload file with name %v. Extension not allowed.", header.Filename))
 		apiErr := api_error.NewBadRequestError(msg)
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
 
-	bcdate := c.PostForm("bcdate")
-	starttime := c.PostForm("starttime")
-	endtime := c.PostForm("endtime")
-	// sanitize data
-	// parse data
-	// package into struct
-	logger.Info(fmt.Sprintf("bcdate: %v, starttime: %v, endtime: %v", bcdate, starttime, endtime))
+	fd.File = file
+	fd.Header = header
+	fd.BcDate = c.PostForm("bcdate")
+	fd.StartTime = c.PostForm("starttime")
+	fd.EndTime = c.PostForm("endtime")
 
-	localFile := path.Join(uh.Cfg.Upload.Path, handler.Filename)
+	err = uh.Cfg.RunTime.Sani.Sanitize(&fd)
+
+	if err != nil {
+		msg := "Date or time not correct"
+		logger.Warn(msg)
+		apiErr := api_error.NewBadRequestError(msg)
+		c.JSON(apiErr.StatusCode(), apiErr)
+		return
+	}
+
+	logger.Info(fmt.Sprintf("bcdate: %v, starttime: %v, endtime: %v", fd.BcDate, fd.StartTime, fd.EndTime))
+
+	localFile := path.Join(uh.Cfg.Upload.Path, header.Filename)
 	dst, err := os.Create(localFile)
 	if err != nil {
 		msg := "cannot create local file"

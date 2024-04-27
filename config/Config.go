@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-sanitize/sanitize"
 	"github.com/johannes-kuhfuss/services_utils/api_error"
 	"github.com/johannes-kuhfuss/services_utils/logger"
 	"github.com/joho/godotenv"
@@ -33,6 +34,7 @@ type AppConfig struct {
 		Router     *gin.Engine
 		ListenAddr string
 		StartDate  time.Time
+		Sani       *sanitize.Sanitizer
 	}
 }
 
