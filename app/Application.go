@@ -14,16 +14,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/johannes-kuhfuss/fileupload/config"
+	handler "github.com/johannes-kuhfuss/fileupload/handlers"
+	"github.com/johannes-kuhfuss/fileupload/service"
 	"github.com/johannes-kuhfuss/services_utils/date"
 	"github.com/johannes-kuhfuss/services_utils/logger"
 )
 
 var (
-	cfg    config.AppConfig
-	server http.Server
-	appEnd chan os.Signal
-	ctx    context.Context
-	cancel context.CancelFunc
+	cfg           config.AppConfig
+	server        http.Server
+	appEnd        chan os.Signal
+	ctx           context.Context
+	cancel        context.CancelFunc
+	uploadService service.DefaultUploadService
+	uploadHandler handler.UploadHandler
 )
 
 func StartApp() {
@@ -44,7 +48,7 @@ func StartApp() {
 	<-appEnd
 	cleanUp()
 
-	if srvErr := server.Shutdown(ctx); err != nil {
+	if srvErr := server.Shutdown(ctx); srvErr != nil {
 		logger.Error("Graceful shutdown failed", srvErr)
 	} else {
 		logger.Info("Graceful shutdown finished")
@@ -107,9 +111,12 @@ func initServer() {
 }
 
 func wireApp() {
+	uploadService = service.NewUploadService(&cfg)
+	uploadHandler = handler.NewUploadHandler(&cfg, uploadService)
 }
 
 func mapUrls() {
+	cfg.RunTime.Router.POST("/upload", uploadHandler.Receive)
 }
 
 func RegisterForOsSignals() {

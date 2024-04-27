@@ -25,6 +25,10 @@ type AppConfig struct {
 		Mode         string `envconfig:"GIN_MODE" default:"release"`
 		TemplatePath string `envconfig:"TEMPLATE_PATH" default:"./templates/"`
 	}
+	Upload struct {
+		Path              string   `envconfig:"UPLOAD_PATH" default:"C:\\TEMP"`
+		AllowedExtensions []string `envconfig:"ALLOWED_EXTENESION" default:".mp3,.m4a,.wav"`
+	}
 	RunTime struct {
 		Router     *gin.Engine
 		ListenAddr string
