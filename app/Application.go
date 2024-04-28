@@ -29,6 +29,7 @@ var (
 	cancel        context.CancelFunc
 	uploadService service.DefaultUploadService
 	uploadHandler handler.UploadHandler
+	uiHandler     handler.UiHandler
 )
 
 func StartApp() {
@@ -115,10 +116,14 @@ func initServer() {
 func wireApp() {
 	uploadService = service.NewUploadService(&cfg)
 	uploadHandler = handler.NewUploadHandler(&cfg, uploadService)
+	uiHandler = handler.NewUiHandler(&cfg)
 }
 
 func mapUrls() {
 	cfg.RunTime.Router.POST("/upload", uploadHandler.Receive)
+	cfg.RunTime.Router.GET("/", uiHandler.UploadPage)
+	cfg.RunTime.Router.GET("/status", uiHandler.StatusPage)
+	cfg.RunTime.Router.GET("/about", uiHandler.AboutPage)
 }
 
 func RegisterForOsSignals() {

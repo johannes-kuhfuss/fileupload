@@ -22,18 +22,25 @@
 
     <script>
       function submitForm(button_id) {
-        const statusField = document.getElementById("status");
-        const hourField = document.getElementById("hour");
-        statusField.value = "Sending request..."
-        var http = new XMLHttpRequest();
-        http.open("POST", "/actions", true);
-        http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-        var params = "action=" + button_id + "&hour=" + hourField.value
-        http.send(params);
-        setTimeout(function(){
-            location.reload();
-            statusField.value = "Request sent."
-        }, 500);
+         
+        const formData = new FormData();
+        
+        const bcdate = document.getElementById("bcdate");
+        const starttime = document.getElementById("starttime");
+        const endtime = document.getElementById("endtime");
+        const file = document.getElementById("file");
+        console.log(file.value);
+
+        formData.append("bcdate", bcdate.value);
+        formData.append("starttime", starttime.value);
+        formData.append("endtime", endtime.value);
+        formData.append("file", file.files[0]);
+
+        const response = fetch("http://localhost:8080/upload", {
+          method: "POST",
+          body: formData,
+        });
+
         }
     </script>
 
