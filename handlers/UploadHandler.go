@@ -2,10 +2,7 @@ package handler
 
 import (
 	"fmt"
-	"io"
 	"net/http"
-	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -18,14 +15,14 @@ import (
 )
 
 type UploadHandler struct {
-	Service service.DefaultUploadService
-	Cfg     *config.AppConfig
+	Svc service.DefaultUploadService
+	Cfg *config.AppConfig
 }
 
 func NewUploadHandler(cfg *config.AppConfig, svc service.DefaultUploadService) UploadHandler {
 	return UploadHandler{
-		Cfg:     cfg,
-		Service: svc,
+		Cfg: cfg,
+		Svc: svc,
 	}
 }
 
@@ -69,17 +66,16 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 	err = uh.Cfg.RunTime.Sani.Sanitize(&fd)
 
 	if err != nil {
-		msg := "Date or time not correct"
+		msg := "Date and/or time not present"
 		logger.Warn(msg)
 		apiErr := api_error.NewBadRequestError(msg)
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
 
-	logger.Info(fmt.Sprintf("bcdate: %v, starttime: %v, endtime: %v", fd.BcDate, fd.StartTime, fd.EndTime))
+	logger.Info(fmt.Sprintf("file: %v, bcdate: %v, starttime: %v, endtime: %v", fd.Header.Filename, fd.BcDate, fd.StartTime, fd.EndTime))
 
-	localFile := path.Join(uh.Cfg.Upload.Path, header.Filename)
-	dst, err := os.Create(localFile)
+	bw, err := uh.Svc.Upload(fd)
 	if err != nil {
 		msg := "cannot create local file"
 		logger.Error(msg, err)
@@ -87,15 +83,10 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
-	defer dst.Close()
-
-	if _, err := io.Copy(dst, file); err != nil {
-		msg := "cannot copy to local file"
-		logger.Error(msg, err)
-		apiErr := api_error.NewInternalServerError(msg, err)
-		c.JSON(apiErr.StatusCode(), apiErr)
-		return
+	ret := dto.FileRet{
+		FileName:     fd.Header.Filename,
+		BytesWritten: bw,
 	}
 
-	c.JSON(http.StatusCreated, nil)
+	c.JSON(http.StatusCreated, ret)
 }
