@@ -5,7 +5,7 @@
    <div class="container">
         <div class="row">
             <div class="col">
-                <h1>mAirlist Feeder</h1>
+                <h1>Simple File Upload</h1>
                 <h2>Status</h2>
                 <table class="table table-striped table-sm">
                     <thead>
@@ -15,62 +15,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                          <td>Root Folder for crawl</td>
-                          <td>{{ .configdata.RootFolder }}</td>
-                        </tr>
-                        <tr>
-                          <td>File Extensions to include</td>
-                          <td>{{ .configdata.FileExtensions }}</td>
-                        </tr>
-                        <tr>
-                          <td>Crawl Cycle in minutes</td>
-                          <td>{{ .configdata.CycleTime }}</td>
-                        </tr>
-                        <tr>
-                          <td>Playlist Export Folder</td>
-                          <td>{{ .configdata.ExportFolder }}</td>
-                        </tr>
-                        <tr>
-                          <td>How many minutes short and still accepted?</td>
-                          <td>{{ .configdata.ShortAllowance }}</td>
-                        </tr>
-                        <tr>
-                          <td>How many minutes long and still accepted?</td>
-                          <td>{{ .configdata.LongAllowance }}</td>
-                        </tr>
-                        <tr>
-                          <td>Crawl runs executed</td>
-                          <td>{{ .configdata.CrawlRunNumber }}</td>
-                        </tr>
-                        <tr>
-                          <td>Last Crawl Run</td>
-                          <td>{{ .configdata.LastCrawlDate }}</td>
-                        </tr>
-                        <tr>
-                          <td>Number of files in list</td>
-                          <td>{{ .configdata.FilesInList }}</td>
-                        </tr>
-                        <tr>
-                          <td>Last Export Date</td>
-                          <td>{{ .configdata.LastExportDate }}</td>
-                        </tr>
-                        <tr>
-                          <td>Last file exported</td>
-                          <td>{{ .configdata.LastExportFileName }}</td>
-                        </tr>
-                        <tr>
-                          <td>Crawl process running</td>
-                          <td>{{ .configdata.CrawlRunning }}</td>
-                        </tr>
-                        <tr>
-                          <td>Export process running</td>
-                          <td>{{ .configdata.ExportRunning }}</td>
-                        </tr>
-                        <tr>
-                          <td>Clean-up process running</td>
-                          <td>{{ .configdata.CleanRunning }}</td>
-                        </tr>
                     </tbody>
                 </table>
                 <h2>Server</h2>
