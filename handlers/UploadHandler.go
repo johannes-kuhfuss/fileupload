@@ -75,7 +75,9 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 
 	logger.Info(fmt.Sprintf("file: %v, bcdate: %v, starttime: %v, endtime: %v", fd.Header.Filename, fd.BcDate, fd.StartTime, fd.EndTime))
 
-	bw, err := uh.Svc.Upload(fd)
+	uploadUser := gin.AuthUserKey
+
+	bw, err := uh.Svc.Upload(fd, uploadUser)
 	if err != nil {
 		msg := "cannot create local file"
 		logger.Error(msg, err)

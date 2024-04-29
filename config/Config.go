@@ -30,6 +30,8 @@ type AppConfig struct {
 		Path              string            `envconfig:"UPLOAD_PATH" default:"C:\\TEMP"`
 		AllowedExtensions []string          `envconfig:"ALLOWED_EXTENESION" default:".mp3,.m4a,.wav"`
 		Users             map[string]string `envconfig:"USERS"`
+		WriteLog          bool              `envconfig:"WRITE_LOG" default:"true"`
+		LogFile           string            `envconfig:"LOG_FILE" default:"upload_log.txt"`
 	}
 	RunTime struct {
 		Router     *gin.Engine

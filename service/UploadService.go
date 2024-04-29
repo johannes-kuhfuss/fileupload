@@ -26,7 +26,7 @@ func NewUploadService(cfg *config.AppConfig) DefaultUploadService {
 	}
 }
 
-func (s DefaultUploadService) Upload(fd dto.FileDta) (written int64, err error) {
+func (s DefaultUploadService) Upload(fd dto.FileDta, uploadUser string) (written int64, err error) {
 	localFile := buildFileName(s.Cfg.Upload.Path, fd.BcDate, fd.StartTime, fd.EndTime, fd.Header.Filename)
 	dst, err := os.Create(localFile)
 	if err != nil {
@@ -36,6 +36,19 @@ func (s DefaultUploadService) Upload(fd dto.FileDta) (written int64, err error) 
 	bw, err := io.Copy(dst, fd.File)
 	if err != nil {
 		return 0, err
+	}
+	if s.Cfg.Upload.WriteLog {
+		file, err := os.OpenFile(s.Cfg.Upload.LogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			logger.Error("Could not write upload to log file", err)
+		}
+		defer file.Close()
+		t := time.Now().Format(time.RFC3339)
+		logLine := fmt.Sprintf("%v: %v uploaded %v for %v. Start: %v, End: %v. Size: %v", t, uploadUser, fd.Header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, bw)
+		_, err = file.WriteString(logLine)
+		if err != nil {
+			logger.Error("Could not write upload to log file", err)
+		}
 	}
 	return bw, nil
 }
