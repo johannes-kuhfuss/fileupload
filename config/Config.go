@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-sanitize/sanitize"
+	"github.com/johannes-kuhfuss/fileupload/domain"
 	"github.com/johannes-kuhfuss/services_utils/api_error"
 	"github.com/johannes-kuhfuss/services_utils/logger"
 	"github.com/joho/godotenv"
@@ -27,8 +28,9 @@ type AppConfig struct {
 		TemplatePath string `envconfig:"TEMPLATE_PATH" default:"./templates/"`
 	}
 	Upload struct {
-		Path              string   `envconfig:"UPLOAD_PATH" default:"C:\\TEMP"`
-		AllowedExtensions []string `envconfig:"ALLOWED_EXTENESION" default:".mp3,.m4a,.wav"`
+		Path              string       `envconfig:"UPLOAD_PATH" default:"C:\\TEMP"`
+		AllowedExtensions []string     `envconfig:"ALLOWED_EXTENESION" default:".mp3,.m4a,.wav"`
+		Users             domain.Users `envconfig:"USERS"`
 	}
 	RunTime struct {
 		Router     *gin.Engine
