@@ -120,12 +120,12 @@ func wireApp() {
 }
 
 func mapUrls() {
-	authorized := cfg.RunTime.Router.Group("/", basicAuth(cfg.Upload.Users))
-	_ = authorized
+
 	cfg.RunTime.Router.POST("/upload", uploadHandler.Receive)
-	cfg.RunTime.Router.GET("/", uiHandler.UploadPage)
-	cfg.RunTime.Router.GET("/status", uiHandler.StatusPage)
-	cfg.RunTime.Router.GET("/about", uiHandler.AboutPage)
+	authorized := cfg.RunTime.Router.Group("/", basicAuth(cfg.Upload.Users))
+	authorized.GET("/", uiHandler.UploadPage)
+	authorized.GET("/status", uiHandler.StatusPage)
+	authorized.GET("/about", uiHandler.AboutPage)
 }
 
 func RegisterForOsSignals() {
