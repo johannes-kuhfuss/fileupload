@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/johannes-kuhfuss/services_utils/api_error"
 	"github.com/johannes-kuhfuss/services_utils/logger"
 )
 
@@ -15,12 +17,22 @@ func basicAuth(users map[string]string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeaders := c.Request.Header["Authorization"]
 		found, user := checkAuth(users, authHeaders)
+		_ = user
 		if !found {
 			c.Header("WWW-Authenticate", realm)
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
+		} else {
+			session := sessions.Default(c)
+			session.Set("uploadUser", user)
+			err := session.Save()
+			if err != nil {
+				msg := "could not save session"
+				logger.Error(msg, err)
+				apiErr := api_error.NewInternalServerError(msg, err)
+				c.JSON(apiErr.StatusCode(), apiErr)
+			}
 		}
-		c.Set(gin.AuthUserKey, user)
 	}
 }
 

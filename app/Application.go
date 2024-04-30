@@ -12,9 +12,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/go-sanitize/sanitize"
 	"github.com/johannes-kuhfuss/fileupload/config"
+	"github.com/johannes-kuhfuss/fileupload/handler"
 	"github.com/johannes-kuhfuss/fileupload/service"
 	"github.com/johannes-kuhfuss/services_utils/date"
 	"github.com/johannes-kuhfuss/services_utils/logger"
@@ -29,7 +32,6 @@ var (
 	uploadService service.DefaultUploadService
 	uploadHandler handler.UploadHandler
 	uiHandler     handler.UiHandler
-	acc           gin.Accounts
 )
 
 func StartApp() {
@@ -69,6 +71,8 @@ func initRouter() {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+	secret := []byte(cfg.Server.CookieSecret)
+	router.Use(sessions.Sessions("uploadSession", cookie.NewStore(secret)))
 	router.SetTrustedProxies(nil)
 	globPath := filepath.Join(cfg.Gin.TemplatePath, "*.tmpl")
 	router.LoadHTMLGlob(globPath)
@@ -120,7 +124,6 @@ func wireApp() {
 }
 
 func mapUrls() {
-
 	cfg.RunTime.Router.POST("/upload", uploadHandler.Receive)
 	authorized := cfg.RunTime.Router.Group("/", basicAuth(cfg.Upload.Users))
 	authorized.GET("/", uiHandler.UploadPage)

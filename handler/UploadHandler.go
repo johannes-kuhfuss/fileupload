@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/johannes-kuhfuss/fileupload/config"
 	"github.com/johannes-kuhfuss/fileupload/dto"
@@ -75,9 +76,10 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 
 	logger.Info(fmt.Sprintf("file: %v, bcdate: %v, starttime: %v, endtime: %v", fd.Header.Filename, fd.BcDate, fd.StartTime, fd.EndTime))
 
-	uploadUser := c.MustGet(gin.AuthUserKey).(string)
+	session := sessions.Default(c)
+	uu := session.Get("uploadUser").(string)
 
-	bw, err := uh.Svc.Upload(fd, uploadUser)
+	bw, err := uh.Svc.Upload(fd, uu)
 	if err != nil {
 		msg := "cannot create local file"
 		logger.Error(msg, err)

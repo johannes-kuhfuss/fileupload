@@ -1,3 +1,2 @@
-save user name and user for log file
 get feedback to UI
 encrypt passwords
