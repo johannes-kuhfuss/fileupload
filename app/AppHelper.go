@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/johannes-kuhfuss/services_utils/api_error"
 	"github.com/johannes-kuhfuss/services_utils/logger"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func basicAuth(users map[string]string) gin.HandlerFunc {
@@ -48,19 +49,12 @@ func checkAuth(users map[string]string, authHeaders []string) (found bool, user 
 					givenPass := parts[1]
 					pwhash, exists := users[givenUser]
 					if !exists {
-						logger.Info(fmt.Sprintf("User %v not found", givenUser))
+						logger.Warn(fmt.Sprintf("User %v not found", givenUser))
 						return false, ""
 					} else {
-						/*
-							err := bcrypt.CompareHashAndPassword([]byte(givenPass), []byte(pwhash))
-							if err == nil {
-								return true, givenUser
-							} else {
-								h, _ := bcrypt.GenerateFromPassword([]byte(givenPass), bcrypt.DefaultCost)
-								logger.Info(fmt.Sprintf("Password %v does not equal hash %v. Hash: %v", givenPass, pwhash, string(h)))
-							}
-						*/
-						if givenPass == pwhash {
+						testHash, _ := base64.StdEncoding.DecodeString(pwhash)
+						err := bcrypt.CompareHashAndPassword(testHash, []byte(givenPass))
+						if err == nil {
 							return true, givenUser
 						}
 					}
