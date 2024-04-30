@@ -36,10 +36,12 @@
         formData.append("endtime", endtime.value);
         formData.append("file", file.files[0]);
 
-        const response = fetch("http://localhost:8080/upload", {
+        const response = fetch("./upload", {
           method: "POST",
           body: formData,
         });
+
+        const statusField = document.getElementById("status");
 
         }
     </script>
