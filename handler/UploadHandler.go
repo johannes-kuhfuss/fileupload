@@ -75,7 +75,7 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 
 	logger.Info(fmt.Sprintf("file: %v, bcdate: %v, starttime: %v, endtime: %v", fd.Header.Filename, fd.BcDate, fd.StartTime, fd.EndTime))
 
-	uploadUser := gin.AuthUserKey
+	uploadUser := c.MustGet(gin.AuthUserKey).(string)
 
 	bw, err := uh.Svc.Upload(fd, uploadUser)
 	if err != nil {

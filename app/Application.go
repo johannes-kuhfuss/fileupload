@@ -15,7 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-sanitize/sanitize"
 	"github.com/johannes-kuhfuss/fileupload/config"
-	handler "github.com/johannes-kuhfuss/fileupload/handlers"
 	"github.com/johannes-kuhfuss/fileupload/service"
 	"github.com/johannes-kuhfuss/services_utils/date"
 	"github.com/johannes-kuhfuss/services_utils/logger"
@@ -30,6 +29,7 @@ var (
 	uploadService service.DefaultUploadService
 	uploadHandler handler.UploadHandler
 	uiHandler     handler.UiHandler
+	acc           gin.Accounts
 )
 
 func StartApp() {
