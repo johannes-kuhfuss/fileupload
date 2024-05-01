@@ -127,6 +127,7 @@ func mapUrls() {
 	cfg.RunTime.Router.POST("/upload", uploadHandler.Receive)
 	authorized := cfg.RunTime.Router.Group("/", basicAuth(cfg.Upload.Users))
 	authorized.GET("/", uiHandler.UploadPage)
+	authorized.GET("/files", uiHandler.UploadListPage)
 	authorized.GET("/status", uiHandler.StatusPage)
 	authorized.GET("/about", uiHandler.AboutPage)
 }
