@@ -40,7 +40,7 @@ type AppConfig struct {
 		ListenAddr string
 		StartDate  time.Time
 		Sani       *sanitize.Sanitizer
-		UploadList domain.Uploads
+		UploadList []domain.Upload
 	}
 }
 

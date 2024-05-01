@@ -9,5 +9,3 @@ type Upload struct {
 	Uploader  string
 	Size      string
 }
-
-type Uploads []Upload
