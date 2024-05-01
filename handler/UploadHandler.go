@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/johannes-kuhfuss/fileupload/config"
 	"github.com/johannes-kuhfuss/fileupload/dto"
+	"github.com/johannes-kuhfuss/fileupload/helper"
 	"github.com/johannes-kuhfuss/fileupload/service"
 	"github.com/johannes-kuhfuss/services_utils/api_error"
 	"github.com/johannes-kuhfuss/services_utils/logger"
@@ -51,6 +53,7 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 	defer file.Close()
 
 	if !misc.SliceContainsString(uh.Cfg.Upload.AllowedExtensions, filepath.Ext(header.Filename)) {
+		helper.AddToUploadList(uh.Cfg, header.Filename, "", "", "", fmt.Sprintf("Extension %v not allowed", filepath.Ext(header.Filename)), "", "")
 		msg := fmt.Sprintf("Cannot upload file with extension %v", filepath.Ext(header.Filename))
 		logger.Warn(fmt.Sprintf("User tried to upload file with name %v. Extension not allowed.", header.Filename))
 		apiErr := api_error.NewBadRequestError(msg)
@@ -67,6 +70,7 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 	err = uh.Cfg.RunTime.Sani.Sanitize(&fd)
 
 	if err != nil {
+		helper.AddToUploadList(uh.Cfg, header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, "Missing date / time information", "", "")
 		msg := "Date and/or time not present"
 		logger.Warn(msg)
 		apiErr := api_error.NewBadRequestError(msg)
@@ -74,19 +78,19 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 		return
 	}
 
-	logger.Info(fmt.Sprintf("file: %v, bcdate: %v, starttime: %v, endtime: %v", fd.Header.Filename, fd.BcDate, fd.StartTime, fd.EndTime))
-
 	session := sessions.Default(c)
 	uu := session.Get("uploadUser").(string)
 
 	bw, err := uh.Svc.Upload(fd, uu)
 	if err != nil {
+		helper.AddToUploadList(uh.Cfg, header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, "Could not complete the upload", uu, "")
 		msg := "cannot create local file"
 		logger.Error(msg, err)
 		apiErr := api_error.NewInternalServerError(msg, err)
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
+	helper.AddToUploadList(uh.Cfg, header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, "Successfully completed", uu, strconv.FormatInt(bw, 10))
 	ret := dto.FileRet{
 		FileName:     fd.Header.Filename,
 		BytesWritten: bw,

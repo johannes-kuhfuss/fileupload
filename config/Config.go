@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-sanitize/sanitize"
+	"github.com/johannes-kuhfuss/fileupload/domain"
 	"github.com/johannes-kuhfuss/services_utils/api_error"
 	"github.com/johannes-kuhfuss/services_utils/logger"
 	"github.com/joho/godotenv"
@@ -39,6 +40,7 @@ type AppConfig struct {
 		ListenAddr string
 		StartDate  time.Time
 		Sani       *sanitize.Sanitizer
+		UploadList domain.Uploads
 	}
 }
 
