@@ -1,2 +1,1 @@
-get feedback to UI
-encrypt passwords
+get feedback to UI upon upload
