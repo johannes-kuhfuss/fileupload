@@ -2,10 +2,8 @@ package handler
 
 import (
 	"fmt"
-	"math"
 	"net/http"
 	"path/filepath"
-	"strconv"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -34,7 +32,11 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 	var (
 		fd dto.FileDta
 	)
-	logger.Info("Upload request received")
+	session := sessions.Default(c)
+	fd.Uploader = session.Get("uploadUser").(string)
+
+	logger.Info(fmt.Sprintf("Upload request received from %v", fd.Uploader))
+
 	err := c.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
 		msg := "error getting form"
@@ -43,7 +45,7 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
-	file, header, err := c.Request.FormFile("file")
+	fd.File, fd.Header, err = c.Request.FormFile("file")
 	if err != nil {
 		msg := "cannot read remote file"
 		logger.Error(msg, err)
@@ -51,54 +53,45 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
-	defer file.Close()
+	defer fd.File.Close()
 
-	if !misc.SliceContainsString(uh.Cfg.Upload.AllowedExtensions, filepath.Ext(header.Filename)) {
-		helper.AddToUploadList(uh.Cfg, header.Filename, "", "", "", fmt.Sprintf("Extension %v not allowed", filepath.Ext(header.Filename)), "", "")
-		msg := fmt.Sprintf("Cannot upload file with extension %v", filepath.Ext(header.Filename))
-		logger.Warn(fmt.Sprintf("User tried to upload file with name %v. Extension not allowed.", header.Filename))
-		apiErr := api_error.NewBadRequestError(msg)
-		c.JSON(apiErr.StatusCode(), apiErr)
-		return
-	}
-
-	fd.File = file
-	fd.Header = header
-	fd.BcDate = c.PostForm("bcdate")
-	fd.StartTime = c.PostForm("starttime")
-	fd.EndTime = c.PostForm("endtime")
-
-	err = uh.Cfg.RunTime.Sani.Sanitize(&fd)
-
-	if err != nil {
-		helper.AddToUploadList(uh.Cfg, header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, "Missing date / time information", "", "")
-		msg := "Date and/or time not present"
+	if !misc.SliceContainsString(uh.Cfg.Upload.AllowedExtensions, filepath.Ext(fd.Header.Filename)) {
+		msg := fmt.Sprintf("Cannot upload file with extension %v", filepath.Ext(fd.Header.Filename))
+		helper.AddToUploadList(uh.Cfg, fd, msg)
 		logger.Warn(msg)
 		apiErr := api_error.NewBadRequestError(msg)
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
 
-	session := sessions.Default(c)
-	uu := session.Get("uploadUser").(string)
-
-	bw, err := uh.Svc.Upload(fd, uu)
+	fd.BcDate = c.PostForm("bcdate")
+	fd.StartTime = c.PostForm("starttime")
+	fd.EndTime = c.PostForm("endtime")
+	err = uh.Cfg.RunTime.Sani.Sanitize(&fd)
 	if err != nil {
-		helper.AddToUploadList(uh.Cfg, header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, "Could not complete the upload", uu, "")
-		msg := "cannot create local file"
+		msg := "Date and/or time information missing"
+		helper.AddToUploadList(uh.Cfg, fd, msg)
+		logger.Warn(msg)
+		apiErr := api_error.NewBadRequestError(msg)
+		c.JSON(apiErr.StatusCode(), apiErr)
+		return
+	}
+
+	fd.FileSize, err = uh.Svc.Upload(fd)
+	if err != nil {
+		msg := "Could not complete the upload"
+		helper.AddToUploadList(uh.Cfg, fd, msg)
 		logger.Error(msg, err)
 		apiErr := api_error.NewInternalServerError(msg, err)
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
-	sizekb := float64(bw) / (1 << 20)
-	sizeStr := strconv.FormatInt(int64((math.Round(sizekb))), 10) + "MB"
-	helper.AddToUploadList(uh.Cfg, header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, "Successfully completed", uu, sizeStr)
+	helper.AddToUploadList(uh.Cfg, fd, "Successfully completed")
 	logger.Info("Upload request completed")
+
 	ret := dto.FileRet{
 		FileName:     fd.Header.Filename,
-		BytesWritten: bw,
+		BytesWritten: fd.FileSize,
 	}
-
 	c.JSON(http.StatusCreated, ret)
 }

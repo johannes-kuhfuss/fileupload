@@ -8,6 +8,8 @@ type FileDta struct {
 	BcDate    string `san:"trim,xss,max=10"`
 	StartTime string `san:"trim,xss,max=10"`
 	EndTime   string `san:"trim,xss,max=10"`
+	Uploader  string
+	FileSize  int64
 }
 
 type FileRet struct {
