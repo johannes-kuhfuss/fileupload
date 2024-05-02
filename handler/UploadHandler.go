@@ -91,8 +91,8 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
-	sizekb := float64(bw) / (1 << 10)
-	sizeStr := strconv.FormatInt(int64((math.Round(sizekb))), 10) + "kB"
+	sizekb := float64(bw) / (1 << 20)
+	sizeStr := strconv.FormatInt(int64((math.Round(sizekb))), 10) + "MB"
 	helper.AddToUploadList(uh.Cfg, header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, "Successfully completed", uu, sizeStr)
 	logger.Info("Upload request completed")
 	ret := dto.FileRet{
