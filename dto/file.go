@@ -1,6 +1,10 @@
 package dto
 
-import "mime/multipart"
+import (
+	"mime/multipart"
+
+	"github.com/google/uuid"
+)
 
 type FileDta struct {
 	File      multipart.File
@@ -10,6 +14,7 @@ type FileDta struct {
 	EndTime   string `san:"trim,xss,max=10"`
 	Uploader  string
 	FileSize  int64
+	FileId    uuid.UUID
 }
 
 type FileRet struct {

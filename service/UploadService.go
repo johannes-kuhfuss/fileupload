@@ -44,7 +44,7 @@ func (s DefaultUploadService) Upload(fd dto.FileDta) (written int64, err error) 
 		}
 		defer file.Close()
 		t := time.Now().Format(time.RFC3339)
-		logLine := fmt.Sprintf("%v: \"%v\" uploaded \"%v\" for %v. Start: %v, End: %v. Size: %v\n", t, fd.Uploader, fd.Header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, bw)
+		logLine := fmt.Sprintf("%v: \"%v\" uploaded \"%v\" for %v. Start: %v, End: %v, Size: %v, Id: %v\n", t, fd.Uploader, fd.Header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, bw, fd.FileId.String())
 		_, err = file.WriteString(logLine)
 		if err != nil {
 			logger.Error("Could not write upload to log file", err)

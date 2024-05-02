@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/johannes-kuhfuss/fileupload/config"
 	"github.com/johannes-kuhfuss/fileupload/dto"
 	"github.com/johannes-kuhfuss/fileupload/helper"
@@ -34,8 +35,9 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 	)
 	session := sessions.Default(c)
 	fd.Uploader = session.Get("uploadUser").(string)
+	fd.FileId = uuid.New()
 
-	logger.Info(fmt.Sprintf("Upload request received from %v", fd.Uploader))
+	logger.Info(fmt.Sprintf("Upload request %v received from %v", fd.FileId.String(), fd.Uploader))
 
 	err := c.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
@@ -64,6 +66,8 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 		return
 	}
 
+	logger.Info(fmt.Sprintf("Upload request %v, File: %v", fd.FileId.String(), fd.Header.Filename))
+
 	fd.BcDate = c.PostForm("bcdate")
 	fd.StartTime = c.PostForm("starttime")
 	fd.EndTime = c.PostForm("endtime")
@@ -77,6 +81,8 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 		return
 	}
 
+	logger.Info(fmt.Sprintf("request %v metadata. Brodcast Date: %v, Start Time: %v, End Time: %v", fd.FileId.String(), fd.BcDate, fd.StartTime, fd.EndTime))
+
 	fd.FileSize, err = uh.Svc.Upload(fd)
 	if err != nil {
 		msg := "Could not complete the upload"
@@ -87,7 +93,7 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 		return
 	}
 	helper.AddToUploadList(uh.Cfg, fd, "Successfully completed")
-	logger.Info("Upload request completed")
+	logger.Info(fmt.Sprintf("Upload request %v (file: %v) sucessfully completed.", fd.FileId.String(), fd.Header.Filename))
 
 	ret := dto.FileRet{
 		FileName:     fd.Header.Filename,
