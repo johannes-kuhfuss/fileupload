@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -90,7 +91,9 @@ func (uh UploadHandler) Receive(c *gin.Context) {
 		c.JSON(apiErr.StatusCode(), apiErr)
 		return
 	}
-	helper.AddToUploadList(uh.Cfg, header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, "Successfully completed", uu, strconv.FormatInt(bw, 10))
+	sizekb := float64(bw) / (1 << 10)
+	sizeStr := strconv.FormatInt(int64((math.Round(sizekb))), 10) + "kB"
+	helper.AddToUploadList(uh.Cfg, header.Filename, fd.BcDate, fd.StartTime, fd.EndTime, "Successfully completed", uu, sizeStr)
 	logger.Info("Upload request completed")
 	ret := dto.FileRet{
 		FileName:     fd.Header.Filename,

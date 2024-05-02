@@ -10,6 +10,7 @@
                 <table class="table table-striped table-sm">
                     <thead>
                         <tr>
+                          <th scope="col">Upload Date</th>
                           <th scope="col">Name</th>
                           <th scope="col">Broadcast Date</th>
                           <th scope="col">Start Time</th>
@@ -20,8 +21,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{ range .files }}
+                        {{ range .data }}
                         <tr>
+                          <td>{{ .UploadDate }}</td>
                           <td>{{ .FileName }}</td>
                           <td>{{ .BcDate }}</td>
                           <td>{{ .StartTime }}</td>
