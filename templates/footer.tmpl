@@ -15,12 +15,30 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     {{block "js" .}}
 
     {{end}}
 
     <script>
+          flatpickr('#bcdate', {
+            "enableTime": false,
+            "dateFormat": "Y-m-d"
+          });
+          flatpickr('#starttime', {
+            "enableTime": true,
+            "noCalendar": true,
+            "dateFormat": "H:i",
+            "time_24hr": true        
+          });
+          flatpickr('#endtime', {
+            "enableTime": true,
+            "noCalendar": true,
+            "dateFormat": "H:i",
+            "time_24hr": true        
+          });
+
       async function submitForm(button_id) {
          
         const formData = new FormData();
