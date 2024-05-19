@@ -63,11 +63,11 @@ func buildFileName(uploadPath string, bcDate string, startTime string, endTime s
 	dStr := fmt.Sprintf("%02d", bcd.Day())
 	st, err := time.Parse("15:04", startTime)
 	if err != nil {
-		logger.Error("Could not start time.", err)
+		logger.Error("Could not parse start time.", err)
 	}
 	et, err := time.Parse("15:04", endTime)
 	if err != nil {
-		logger.Error("Could not end time.", err)
+		logger.Error("Could not parse end time.", err)
 	}
 	stStr := fmt.Sprintf("%02d%02d", st.Hour(), st.Minute())
 	etStr := fmt.Sprintf("%02d%02d", et.Hour(), et.Minute())
